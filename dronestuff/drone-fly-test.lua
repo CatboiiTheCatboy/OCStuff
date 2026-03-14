@@ -1,0 +1,13 @@
+local drone = component.proxy(component.list("drone")());
+--No extra comps.
+
+local x, y, z = 0, 0, 0;
+function move(x2, y2, z2)
+  x, y, z = x2, y2, z2;
+  drone.move(x2-x, y2-y, z2-z);
+end
+
+for i = 1,10 do
+drone.move(0,1,0);
+end
+error("ROM has been executed successfully.")
