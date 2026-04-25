@@ -1,0 +1,34 @@
+--Reads another ROM script via networking
+local port = 123
+local remote = 456
+--Define ports here
+
+--Requires: modem
+--Each line in a received script needs a ";" or a space
+function init(name, req)
+    local addr = component and component.list(name)();
+    if not addr and req then error("Missing a component."); return end
+    return addr and component.proxy(addr) or nil;
+end
+local modem = init("modem", 1)
+modem.open(port)
+
+function getMsg()
+  local event, _, _, _, _, text = computer.pullSignal()
+  if event == "modem_message" then
+    return text
+  end
+end
+function msg(text)
+  modem.broadcast(remote, text)
+end
+
+--main
+local lines = getMsg()
+local cmd, err = load(lines);
+if cmd then
+  pcall(cmd);
+end
+
+msg("Execution finished.");
+error("Execution finished.")

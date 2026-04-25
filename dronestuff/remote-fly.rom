@@ -1,0 +1,58 @@
+local port = 123;
+local remote = 456;
+
+function init(name, req);
+    local addr = component and component.list(name)();
+    if not addr and req then error("Missing a component."); return end;
+    return addr and component.proxy(addr) or nil;
+end;
+
+local drone = init("drone", 1);
+local modem = init("modem", 1);
+modem.open(port);
+drone.setStatusText(remote .. "->" .. port);
+function getMsg();
+  local event, _, _, _, _, text = computer.pullSignal();
+  if event == "modem_message" then;
+    return text;
+  end;
+end;
+function msg(text);
+  modem.broadcast(remote, text);
+end;
+
+function move(x2, y2, z2);
+  drone.move(x2, y2, z2);
+  return true;
+end;
+
+function use();
+  local bool, feed = drone.use(0);
+  return feed;
+end;
+
+function place();
+  return drone.place(0);
+end;
+
+function swing();
+  return drone.swing(0);
+end;
+
+msg("-- Remote Fly V.4 - 2026 --");
+while true do;
+  local cmd = getMsg();
+  if cmd == "north" then msg(move( 0, 0,-1)) end;
+  if cmd == "south" then msg(move( 0, 0, 1)) end;
+  if cmd == "east"  then msg(move( 1, 0, 0)) end;
+  if cmd == "west"  then msg(move(-1, 0, 0)) end;
+  if cmd == "up"    then msg(move( 0, 1, 0)) end;
+  if cmd == "down"  then msg(move( 0,-1, 0)) end;
+  if cmd == "use"   then msg(use()) end;
+  if cmd == "swing" then msg(swing()) end;
+  if cmd == "place" then msg(place()) end;
+  
+  if cmd == "shutdown" then msg("Goodbye."); error("Remotely shut down.") end;
+
+  msg("Unknown command.");
+end
