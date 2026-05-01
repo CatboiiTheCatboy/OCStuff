@@ -1,0 +1,16 @@
+--[[Tests the persistence of robots. That's about it.]]
+local robot = component.proxy(component.list("robot")());
+
+function wait(t);
+    local to = computer.uptime() + t;
+    while computer.uptime() < to do;
+        computer.pullSignal(0.1);
+    end;
+end;
+
+while true do;
+    robot.move(3);
+    robot.move(2);
+    wait(0.2)
+end;
+error("ROM has been executed successfully.")

@@ -1,0 +1,86 @@
+--[[Strip mines in a ribcage-like pattern.
+  USAGE: place torches into the selected slot then wait.
+  The mining size will be determined from the amount of torches given.
+    Eg. 30 torches : 30 blocks forward, 30+1 blocks wide]]
+
+function init(name, req);
+    local addr = component and component.list(name)();
+    if not addr and req then error("Missing a component."); return end;
+    return addr and component.proxy(addr) or nil;
+end;
+
+function wait(t);
+    local to = computer.uptime() + t;
+    while computer.uptime() < to do;
+        computer.pullSignal(0.1);
+    end;
+end;
+
+local robot = init("robot", true);
+
+for i = 1, 16 do;
+  robot.turn(true); --[[right]]
+  wait(0.25);
+end;
+
+local l = robot.count();
+local n = math.ceil(l / 2);
+
+function step();
+  while not robot.move(3) do;
+    robot.swing(3);
+  end;
+end;
+
+function mine(count);
+  for i = 1, count do;
+    robot.swing(3);
+    step();
+    robot.swing(0);
+    if (i % 10 == 0) then;
+      robot.place(0);
+    end;
+  end;
+end;
+
+function back(count)
+  robot.turn(false);
+  robot.turn(false);
+  for i = 1, count do;
+    step();
+  end;
+end;
+
+function failsafe(); --[[Not tested yet]]
+  local counter = 0;
+  repeat;
+    counter = counter + 1;
+    if counter > l + 1 then;
+        error("Robot is stuck.");
+    end;
+    robot.turn(counter > l / 2); --[[Tries left then right]]
+    step();
+    robot.turn(counter <= l / 2);
+  until robot.move(2) or counter > l + 1;
+end;
+
+
+robot.move(1);
+mine(l);
+for i = 1, l, 3 do;
+  robot.turn(false);
+  mine(n);
+  back(n);
+  mine(n);
+  back(n);
+  robot.turn(true);
+  for j = 1,3 do;
+    if not robot.move(2) then;
+      failsafe();
+    end;
+  end;
+end;
+robot.move(3);
+robot.move(0);
+error(l);
+error("Mining job finished.")

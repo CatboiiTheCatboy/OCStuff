@@ -1,9 +1,18 @@
-local d = component.proxy(component.list("drone")());
---More components go here
+--[[Notes go here]]
 
-local x, y, z = 0, 0, 0;
-function move(x2, y2, z2)
-  x, y, z = x2, y2, z2;
-  d.move(x2-x, y2-y, z2-z);
-end
---More functions go here
+function init(name, req);
+    local addr = component and component.list(name)();
+    if not addr and req then error("Missing a component."); return end;
+    return addr and component.proxy(addr) or nil;
+end;
+
+local drone = init("drone", 1);
+--[[More components go here]]
+
+function move(x, y, z);
+  drone.move(x, y, z);
+end;
+--[[More functions go here]]
+
+--[[Main part goes here]]
+move(0,1,0);

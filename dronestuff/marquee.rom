@@ -1,0 +1,27 @@
+--[[Marquee config]]
+local text = "Hello, world!";
+
+function init(name, req);
+    local addr = component and component.list(name)();
+    if not addr and req then error("Missing a component."); return end;
+    return addr and component.proxy(addr) or nil;
+end;
+
+local drone = init("drone", 1);
+
+function wait(t);
+  to = computer.uptime() + t;
+  while computer.uptime() < to do;
+    computer.pullSignal(0.1);
+  end;
+end;
+
+function marquee(x);
+    for i = -6, #x + 8 do;
+        drone.setStatusText(x:sub(i, i + 7) .. " ");
+        wait(0.1);
+    end;
+end;
+
+--[[Main part goes here]]
+marquee(text)

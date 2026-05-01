@@ -1,5 +1,6 @@
-local port = 123;
-local remote = 456;
+local inst1 = "       INSTRUCTIONS: Position at south-westmost of a 9x9 farm."
+local inst2 = "       Place bone meals at slot 1, and any seeds at 2, 3."
+local inst3 = "       Starting in 10 seconds..."
 
 function init(name, req);
     local addr = component and component.list(name)();
@@ -8,18 +9,6 @@ function init(name, req);
 end;
 
 local drone = init("drone", 1);
-local modem = init("modem", 1);
-modem.open(port);
-
-function getMsg();
-  local event, _, _, _, _, text = computer.pullSignal();
-  if event == "modem_message" then;
-    return text;
-  end;
-end;
-function msg(text);
-  modem.broadcast(remote, text);
-end;
 
 function move(dir);
   if dir == 1 then;
@@ -39,16 +28,21 @@ function wait(t);
   end;
 end;
 
+function marquee(x);
+    for i = 1, #x + 8 do;
+        drone.setStatusText(x:sub(i, i + 7) .. " ");
+        wait(0);
+    end;
+end;
+
 
 drone.select(1);
-drone.setStatusText("Waiting.");
-getMsg();
-msg("Position this drone at south-westmost of a 9x9 farm.");
-getMsg();
-msg("Make sure bone meals are at slot 1, and seeds are at slots 2, 3.");
-getMsg();
+marquee(inst1);
+marquee(inst2);
+marquee(inst3);
+wait(7);
 
-drone.setStatusText(tostring(math.ceil((18.8) / 2)));
+drone.setStatusText("Wait...");
 drone.move(0, 1, 1);
 for i = 1, 16 do;
   for j = 1, math.ceil((16 + 2 - i) / 2) do;
@@ -61,8 +55,8 @@ for i = 1, 16 do;
   end;
 end;
 
-drone.select(2);
 for i = 18, 3, -1 do;
+  drone.select(i % 2 + 2);
   for j = 1, math.ceil((16 + 4 - i) / 2) do;
     drone.place(0);
     wait(0.15)
@@ -72,5 +66,4 @@ for i = 18, 3, -1 do;
 end;
 
 drone.setStatusText("Done.");
-msg("Done.");
 error("Farming finished.");
